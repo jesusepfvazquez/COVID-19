@@ -1,5 +1,5 @@
 # COVID-19 in Latin America
-## Jesus E. Vazquez, PhD Student of Biostatistics__
+__Jesus E. Vazquez, PhD Student of Biostatistics__
 
 __University of North Carolina, Gillings School of Global Public Health__
 
