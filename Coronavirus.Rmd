@@ -68,4 +68,14 @@ ggplot(peru, aes(x=Date)) +  theme_minimal() +
 library(forecast)
 mydfcases %>% subset(Country == "Peru", select = 'Count' ) %>% acf(ylab = 'Autocorrelation Coefficients')
 mydfcases %>% subset(Country == "Peru", select = 'Count' ) %>% pacf(ylab = 'Partial Autocorrelation Coefficients')
+
+library('rsconnect')
+setAccountInfo(name='jesusvazquez',
+              token='8B5DE57F26A3B0873D08975AD2DE8DE3',
+              secret='Fd4/8EZRGen3QGb1CxT1tvaB/Ra88p0evAlRqf9Y')
+
+rsconnect::deployApp(appDir="C:\\Users\\15056\\Documents\\Coronavirus\\app", appPrimaryDoc = "myshiny.R")
+
 ```
+
+
