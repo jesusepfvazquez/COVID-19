@@ -1,5 +1,5 @@
 ---
-title: "Impact and Future Predictions of COVID-19 in Latin America"
+title: "COVID-19 in Latin America"
 subtitle: "UNC Gillings School of Global Public Health"
 author: "Jesus E. Vazquez, PhD Student Biostatistics"
 date: "3/18/2020"
