@@ -10,7 +10,8 @@ __Efforts__
 
 _Report and Scripts Folders:_ Here you will find a short write-up of the intention of the analysis, a description of the methods used to analyze the data and the code to be able to replicate the analysis.
 
-_Web App_: Please visit this link for to see the an updated time-series plot with the actual and expected counts of COVID-19 cases per country.
+_Web App_: Please visit this link for to see the an updated time-series plot with the actual and expected counts of COVID-19 cases per country. [link](https://jesusvazquez.shinyapps.io/myshiny/)
+
 
 If you have any questions or you're interested in collaborating please email me at jesusvaz[at]ad[dot]unc[dot]edu. 
 
