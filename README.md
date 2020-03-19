@@ -1,4 +1,4 @@
-# Impact and Future Predictions of COVID-19 in Latin America
+# COVID-19 in Latin America
 __Jesus E. Vazquez, PhD Student Biostatistics__
 __University of North Carolina, Gillings School of Global Public Health__
 
