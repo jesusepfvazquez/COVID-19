@@ -12,6 +12,6 @@ _Report and Scripts Folders:_ Here you will find a short write-up of the intenti
 
 _Web App_: Please visit this link to see the an updated time-series plot with the actual and expected counts of COVID-19 cases per country. [link](https://jesusvazquez.shinyapps.io/myshiny/)
 
-If you have any questions or you're interested in collaborating please email me at jesusvaz[at]ad[dot]unc[dot]edu. 
+If you have any questions or you're interested in collaborating please feel free to send me an email me at jesusvaz[at]ad[dot]unc[dot]edu. 
 
 Best - Jesus 
