@@ -12,7 +12,7 @@ The purpose of this analysis is to determine the extent at which COVID-19, bette
 
 ## Methods
 
-Scatterplots with the counts of cases will be use to illustrate the progression of the virus, with a comparison to a poisson distribution derived by the current trends. Indexes regarding __airline prices, availability and cancelations, food & gas availability/prices__ as well as the own progression of the virus will be used to predict and forecast the spread of the virus using time-series analysis and multiple linear regression.
+Scatterplots with the counts of cases will be use to illustrate the progression of the virus, with a comparison to a poisson distribution derived by the current trends. An ARIMA will be used to predict and forecast the spread of the virus using time-series analysis.
 
 ## Results
 
@@ -25,50 +25,62 @@ library(tidyverse)
 library(reshape2)
 
 # Reading and subsetting data
-mydfcases <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv") %>%
-  # subset(Country.Region == c('Peru')) %>% 
+mydfcases <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>%
   melt(id.vars=c("Province.State", "Country.Region", "Lat", "Long")) %>%
   rename("Area"= "Province.State", "Country"="Country.Region", "Count" = 'value', 'Date' = 'variable') %>%
   mutate(Date = sub('X', '', Date)) %>%
   mutate(Date = as.Date(Date,"%m.%d.%Y"))
-```
 
-```{R, message = FALSE, warning = FALSE}
-library(ggplot2)
-
-# Creating Timeseries Plot
-mydfcases %>% subset(Country %in% c("Mexico", "Peru")) %>%
-  ggplot(aes(x=Date, colour = Country, y=Count, label = Count)) + 
-  geom_line() + 
-  geom_text(aes(label=ifelse(Count>50,as.character(Count),'')),hjust=0,vjust=0) +
-  theme_minimal() +  
-  labs(y="Number of Cases", x='', title = 'Number of COVID-19 Reported Cases, Latin America')
+mydfcases <- aggregate(mydfcases$Count, by=list(mydfcases$Country, mydfcases$Date), FUN=sum) %>%
+  rename("Country"="Group.1","Date"="Group.2", "Count"="x")
 ```
 
 ```{R}
 # Comparing againts Poisson Random Variable
-peru = mydfcases %>% subset(Country %in% c("Peru") & Count > 0)
-num_days = as.numeric(max(peru$Date) - min(peru$Date))
-num_total_cases = max(peru$Count)
+country = mydfcases %>% subset(Country %in% c("Mexico") & Count > 0)
+num_days = as.numeric(max(country$Date) - min(country$Date))
+num_total_cases = max(country$Count)
 lamba_hat = num_total_cases/num_days
-peru$expected = ppois(0:num_days, lambda = lamba_hat)*num_total_cases
+country$expected = ppois(0:num_days, lambda = lamba_hat)*num_total_cases
 
 # Plotting Agaist Distribution 
-ggplot(peru, aes(x=Date)) +  theme_minimal() +
-  geom_text(aes(x = as.Date("20-03-18"), y = 120, label = "Actual")) + 
-  geom_text(aes(x = as.Date("20-03-18"), y = 70, label = "Expected")) +
-  geom_line(aes(y=expected), colour="red") +  
-  geom_line(aes(y=Count), colour="green")  + 
-  labs(title = 'Expected vs Actual COVID-19 Cases, Peru', subtitle = 'Approximation with Poisson Model', y = 'Cases', x= '')
+ggplot(country, aes(x=Date)) +  
+  geom_text(aes(x = (max(Date)+2), y = max(Count), label = "Actual"), colour = 'red') + 
+  geom_line(aes(y=Count), colour="red")  + 
+  geom_text(aes(x = (max(Date)+2), y = max(expected), label = "Expected"), colour = 'black') +
+  geom_line(aes(y=expected), colour="black") +  
+  labs(title = 'Expected vs Actual COVID-19 Cases, Mexico', subtitle = 'Approximation with Poisson Model', y = 'Cases', x= '')
 ```
 
-## Model Training and Prediction (in progress)
+## Model Training and Prediction using Timeseries
 
 ```{R, message = FALSE, warning = FALSE}
-# Timeseries
 library(forecast)
-mydfcases %>% subset(Country == "Peru", select = 'Count' ) %>% acf(ylab = 'Autocorrelation Coefficients')
-mydfcases %>% subset(Country == "Peru", select = 'Count' ) %>% pacf(ylab = 'Partial Autocorrelation Coefficients')
+
+myforecast <- auto.arima(country$Count) %>% 
+  forecast() %>% 
+  as.data.frame() %>%
+  rename(Count="Point Forecast") %>%
+  subset(select=c("Count"))
+
+max.date = max(country$Date) + dim(myforecast)[1]
+myforecast$Date <- seq(as.Date(max(country$Date))+1, as.Date(max.date), by="days")
+myforecast$Type <- "forecast" 
+myforecast <- myforecast[1:5,]
+
+#Merging datasets 
+country$Type <- 'actual'
+myforecast$Country <- country$Country[1]
+mydata <- full_join(country, myforecast)
+
+#Plot
+ggplot(mydata, aes(x=Date, y = Count, colour = Type, label = Count)) +  
+  theme_minimal() +
+  geom_point() + 
+  geom_line() +
+  geom_text(aes(label=ifelse(Type=='forecast',as.character(Count),'')),hjust=1.5,vjust=0) +
+  scale_x_date(date_labels = "%d %b", date_breaks = '4 day') +
+  labs(y="Number of Cases", x='', title = 'Number of COVID-19 Reported Cases, Mexico', subtitle = 'Actual and Forecast using ARIMA Timeseries Model, 5 Day Projection')
 ```
 
 
