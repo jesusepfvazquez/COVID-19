@@ -25,26 +25,26 @@ library(tidyverse)
 library(reshape2)
 
 # Reading and subsetting data
-mydfcases <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>%
+MyDfCases <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>%
   melt(id.vars=c("Province.State", "Country.Region", "Lat", "Long")) %>%
   rename("Area"= "Province.State", "Country"="Country.Region", "Count" = 'value', 'Date' = 'variable') %>%
   mutate(Date = sub('X', '', Date)) %>%
   mutate(Date = as.Date(Date,"%m.%d.%Y"))
 
-mydfcases <- aggregate(mydfcases$Count, by=list(mydfcases$Country, mydfcases$Date), FUN=sum) %>%
+MyDfCases <- aggregate(MyDfCases$Count, by=list(MyDfCases$Country, MyDfCases$Date), FUN=sum) %>%
   rename("Country"="Group.1","Date"="Group.2", "Count"="x")
 ```
 
 ```{R}
 # Comparing againts Poisson Random Variable
-country = mydfcases %>% subset(Country %in% c("Mexico") & Count > 0)
-num_days = as.numeric(max(country$Date) - min(country$Date))
-num_total_cases = max(country$Count)
-lamba_hat = num_total_cases/num_days
-country$expected = ppois(0:num_days, lambda = lamba_hat)*num_total_cases
+Country = MyDfCases %>% subset(Country %in% c("Mexico") & Count > 0)
+NumDays = as.numeric(max(Country$Date) - min(Country$Date))
+NumTotalCases = max(Country$Count)
+LambaHat = NumTotalCases/NumDays
+Country$expected = ppois(0:NumDays, lambda = LambaHat)*NumTotalCases
 
 # Plotting Agaist Distribution 
-ggplot(country, aes(x=Date)) +  
+ggplot(Country, aes(x=Date)) +  
   geom_text(aes(x = (max(Date)+2), y = max(Count), label = "Actual"), colour = 'red') + 
   geom_line(aes(y=Count), colour="red")  + 
   geom_text(aes(x = (max(Date)+2), y = max(expected), label = "Expected"), colour = 'black') +
@@ -57,24 +57,24 @@ ggplot(country, aes(x=Date)) +
 ```{R, message = FALSE, warning = FALSE}
 library(forecast)
 
-myforecast <- auto.arima(country$Count) %>% 
+MyForecast <- auto.arima(Country$Count) %>% 
   forecast() %>% 
   as.data.frame() %>%
   rename(Count="Point Forecast") %>%
   subset(select=c("Count"))
 
-max.date = max(country$Date) + dim(myforecast)[1]
-myforecast$Date <- seq(as.Date(max(country$Date))+1, as.Date(max.date), by="days")
-myforecast$Type <- "forecast" 
-myforecast <- myforecast[1:5,]
+MaxDate = max(Country$Date) + dim(MyForecast)[1]
+MyForecast$Date <- seq(as.Date(max(Country$Date))+1, as.Date(MaxDate), by="days")
+MyForecast$Type <- "forecast" 
+MyForecast <- MyForecast[1:5,]
 
 #Merging datasets 
-country$Type <- 'actual'
-myforecast$Country <- country$Country[1]
-mydata <- full_join(country, myforecast)
+Country$Type <- 'actual'
+MyForecast$Country <- Country$Country[1]
+MyData <- full_join(Country, MyForecast)
 
 #Plot
-ggplot(mydata, aes(x=Date, y = Count, colour = Type, label = Count)) +  
+ggplot(MyData, aes(x=Date, y = Count, colour = Type, label = Count)) +  
   theme_minimal() +
   geom_point() + 
   geom_line() +
