@@ -17,6 +17,6 @@ __Technical Notes__
 
 1. All code strictly adheres to _Google's R Style Guide_ and is written accordingly. Google's R Style Guide can be found [here](https://google.github.io/styleguide/Rguide.html).
 
-If you have any questions or you're interested in collaborating please feel free to send me an email me at jesusvaz[at]ad[dot]unc[dot]edu. 
+If you have any questions or you're if interested in collaborating please feel free to send me an email at jesusvaz[at]ad[dot]unc[dot]edu. 
 
 Best - Jesus 
